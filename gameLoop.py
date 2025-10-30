@@ -30,4 +30,6 @@ class GameLoop:
                     if keys[K_q]:
                         s.running = False
                     if keys[K_a]:
-                        s.manager.addEntity( randint(0,100),randint(0,100) )
+                        x = randint(20,300); y = randint(20,300)
+                        r = randint(0,90)       # clockwise
+                        s.manager.addEntity( x, y )
