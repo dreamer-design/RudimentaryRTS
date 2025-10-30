@@ -2,6 +2,8 @@ from pygame import display
 from pygame import draw
 from pygame import Rect
 import math
+
+from entityManager import Unit, Structure
 # (0,0) is top left
 
 # Screen settings
@@ -20,7 +22,14 @@ class Renderer:
             screen.fill((100, 100, 100))  # grey
 
             for entity in s.toDraw:
-                s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation)
+                # unit
+                if type(entity) == Unit:
+                    s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation)
+                # structure
+                if isinstance(entity, Structure):
+                    rect = Rect(entity.x, entity.y, entity.size, entity.size) # x,y, height, width
+                    color = (0, 0, 255)
+                    draw.rect( screen, color, rect )
 
             display.flip()
 

@@ -5,7 +5,7 @@ from random import randint
 
 from pygame import time
 from pygame import event, QUIT
-from pygame import key, K_q, K_a, KEYDOWN
+from pygame import key, KEYDOWN, K_q, K_a, K_s
 
 clock = time.Clock()
 
@@ -32,4 +32,8 @@ class GameLoop:
                     if keys[K_a]:
                         x = randint(20,300); y = randint(20,300)
                         r = randint(0,90)       # clockwise
-                        s.manager.addEntity( x, y )
+                        s.manager.addUnit( x, y )
+                    if keys[K_s]:
+                        x = randint(20,300); y = randint(20,300)
+                        r = randint(0,90)       # clockwise
+                        s.manager.addStructure( x, y, (0,0) ) # spawn = 0, unused atm
