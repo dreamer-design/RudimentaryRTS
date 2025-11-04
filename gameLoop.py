@@ -40,10 +40,9 @@ class GameLoop:
                     if keys[K_s]:
                         x = randint(20,300); y = randint(20,300)
                         r = randint(0,90)       # clockwise
-                        s.manager.addStructure( x, y, (0,0) ) # spawn = 0, unused atm
+                        s.manager.addStructure( *mouse.get_pos(), 0 ) # spawn = 0, unused atm
                 if ev.type == MOUSEBUTTONDOWN:
                     if ev.button == 1:  # Left click -> select
                         s.selected = s.manager.get_entity_at(mouse.get_pos())
                     elif ev.button == 3 and s.selected:  # Right click -> move
                         s.selected.target = mouse.get_pos()
-                        # s.selected.point_to_target(*s.selected.target)
