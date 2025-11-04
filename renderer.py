@@ -7,7 +7,7 @@ from entityManager import Unit, Structure
 # (0,0) is top left
 
 # Screen settings
-WIDTH, HEIGHT = 1900, 1200
+WIDTH, HEIGHT = 1900, 1000
 TILE, MULT = 64, 3
 NW, NH = WIDTH // TILE - 2, HEIGHT // TILE - 2
 
