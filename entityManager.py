@@ -1,5 +1,7 @@
 import math
 
+SPAWN_TIME = 5
+
 class EntityManager:
     def __init__(s):
         s.entities = []
@@ -7,10 +9,10 @@ class EntityManager:
     def addEntity(s, x, y, rotation=0, size=40):
         s.entities.append( Unit(x,y, rotation, size) )
 
-    def addUnit(s, x, y, rotation=0, size=40):
-        s.entities.append( Unit(x,y, rotation, size) )
+    def addUnit(s, x, y, spawn, rotation=0, size=40):
+        s.entities.append( Unit(x,y, rotation, size, spawn) )
 
-    def addStructure(s, x, y, spawn_point):
+    def addStructure(s, x, y, spawn_point= (100,100) ):
         s.entities.append( Structure(x,y, spawn_point) )
 
     def get_entity_at(s, pos):
@@ -23,7 +25,9 @@ class EntityManager:
 
     def update(s, dt):
         for e in s.entities:
-            if isinstance(e, Unit):
+            # if isinstance(e, Unit):
+            #     e.update(dt)
+            if hasattr(e, "update"):
                 e.update(dt)
 
 
@@ -65,10 +69,30 @@ class Unit(Entity):
 
 class Structure(Entity):
         spawn = []
+        spawn_timer = 0
 
-        def __init__(s, x, y, spawn_point):
+        def __init__(s, x, y, spawn_point=(100,100) ):
             super().__init__(x, y, rotation=0, size=80)
             s.spawn = spawn_point
+            s.spawn_timer = 0
+            s.spawnable = True
 
         def set_spawn(s, x, y):
-            s.x = x; s.y = y
+            # s.x = x; s.y = y
+            s.spawn = (x, y)
+
+        def update(s, dt):
+            if not s.spawnable:
+                s.spawn_timer -= dt
+                if s.spawn_timer <= 0:
+                    s.spawnable = True
+
+        def spawn_unit(s, manager):
+            if s.spawnable and s.spawn:
+                sx, sy = s.x, s.y # Spawn unit at the structure’s center
+                unit = manager.addUnit(sx, sy, s.spawn) # set its target to the spawn point
+
+                # Handle cooldown
+                s.spawnable = False
+                s.spawn_timer = SPAWN_TIME
+

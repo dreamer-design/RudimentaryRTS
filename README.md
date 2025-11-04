@@ -1,11 +1,24 @@
 # RudimentaryRTS
 a reduced real time strategy implementation
 
-todo:
+implemented:
+# game loop
+key A: spawn unit
+key K: spawn structure
 select unit: left mouse click
 move unit: right mouse click
 
-button to place structure
-mouse click on structure: spawn unit
+timer, SPAWN_TIME constant, countdown in seconds, enable spawnable
+right mouse click on structure. set spawn point
+right mouse click on selected structure: spawn unit
 
-economy?
+
+# renderer
+put green box around selected unit
+spawn point indicator
+
+todo:
+# game loop
+
+
+# renderer

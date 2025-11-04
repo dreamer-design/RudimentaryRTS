@@ -18,18 +18,32 @@ class Renderer:
         def __init__(s, entities):
             s.toDraw = entities
 
-        def render(s):
+        def render(s, selected_unit):
             screen.fill((100, 100, 100))  # grey
+
+            if( selected_unit ):
+                pos = (selected_unit.x,selected_unit.y)
+                sz = selected_unit.size
+                draw.circle(screen, (0, 255, 0), pos, sz) # s, c, center, rad, width
 
             for entity in s.toDraw:
                 # unit
                 if type(entity) == Unit:
                     s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation)
+
                 # structure
                 if isinstance(entity, Structure):
-                    rect = Rect(entity.x, entity.y, entity.size, entity.size) # x,y, height, width
+                    # set to centre of square
+                    half = entity.size / 2
+                    rect = Rect(entity.x - half, entity.y - half, entity.size, entity.size) # x,y, height, width
                     color = (0, 0, 255)
                     draw.rect( screen, color, rect )
+
+                    # Draw spawn point indicator
+                    if entity.spawn:
+                        sx, sy = entity.spawn
+                        draw.circle(screen, (255, 255, 0), (int(sx), int(sy)), 5)
+
 
             display.flip()
 
