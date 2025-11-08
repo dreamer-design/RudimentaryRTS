@@ -1,6 +1,7 @@
-from pygame import display
+from pygame import display, Surface
 from pygame import draw
 from pygame import Rect
+from pygame import font
 import math
 
 from entityManager import Unit, Structure
@@ -8,15 +9,24 @@ from entityManager import Unit, Structure
 
 # Screen settings
 WIDTH, HEIGHT = 1900, 1000
-TILE, MULT = 64, 3
-NW, NH = WIDTH // TILE - 2, HEIGHT // TILE - 2
 
-screen = display.set_mode((NW * TILE, NH * TILE))
-print(NW * MULT ,NH * MULT, NW * TILE * MULT, NH * TILE * MULT)
+# screen vars
+# screen = display.set_mode((NW * TILE, NH * TILE))
+buffer = display.set_mode((WIDTH, HEIGHT))
+screen = Surface( (WIDTH*2, HEIGHT*2) )
+
+# Scroll position
+screen_width, screen_height = WIDTH, HEIGHT
+scroll_x, scroll_y = 0, 0
+scroll_speed = 5  # Speed of scrolling
+edge_threshold = 50  # Threshold distance from the edge to trigger scrolling
+
 
 class Renderer:
         def __init__(s, entities):
             s.toDraw = entities
+            # Define the font and size
+            s.font = font.Font(None, 74)  # None means default font, 74 is the size
 
         def render(s, selected_unit):
             screen.fill((100, 100, 100))  # grey
@@ -39,11 +49,17 @@ class Renderer:
                     color = (0, 0, 255)
                     draw.rect( screen, color, rect )
 
+                    # draw cooldown
+                    text_surface = s.font.render( str( round(entity.spawn_timer) ), True, (255, 255, 255) ) # Render the text white
+                    screen.blit(text_surface, (entity.x, entity.y) )
+
                     # Draw spawn point indicator
                     if entity.spawn:
                         sx, sy = entity.spawn
                         draw.circle(screen, (255, 255, 0), (int(sx), int(sy)), 5)
 
+                # Draw the portion of the buffer that we want to show on the screen
+            buffer.blit(screen, (0, 0), (scroll_x, scroll_y, screen_width, screen_height))
 
             display.flip()
 

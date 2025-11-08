@@ -8,6 +8,8 @@ from pygame import event, QUIT
 from pygame import key, KEYDOWN, K_q, K_a, K_s
 from pygame import mouse, MOUSEBUTTONDOWN
 
+import renderer as r
+
 clock = time.Clock()
 
 class GameLoop:
@@ -24,6 +26,20 @@ class GameLoop:
             dt = clock.tick(60) / 1000
             s.manager.update(dt)
             s.display.render(s.selected)
+
+            # edge scroll
+            # Get mouse position
+            mouse_x, mouse_y = mouse.get_pos()
+
+            # Check if the mouse is near any edge and scroll accordingly
+            if mouse_x < r.edge_threshold:  # Mouse is near the left edge
+                r.scroll_x -= r.scroll_speed
+            if mouse_x > r.screen_width - r.edge_threshold:  # Mouse is near the right edge
+                r.scroll_x += r.scroll_speed
+            if mouse_y < r.edge_threshold:  # Mouse is near the top edge
+                r.scroll_y -= r.scroll_speed
+            if mouse_y > r.screen_height - r.edge_threshold:  # Mouse is near the bottom edge
+                r.scroll_y += r.scroll_speed
 
             # input handle
             for ev in event.get():
@@ -43,6 +59,7 @@ class GameLoop:
                         s.manager.addStructure( *mouse.get_pos() ) # spawn = 0, unused atm
                 if ev.type == MOUSEBUTTONDOWN:
                     pos = mouse.get_pos()
+                    ##### pos = (pos[0] + r.scroll_x, pos[1] + r.scroll_y)  # Adjust for the scrolling
                     if ev.button == 1:  # Left click -> select
                         s.selected = s.manager.get_entity_at( pos ) # return null/pos
 

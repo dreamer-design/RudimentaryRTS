@@ -16,9 +16,11 @@ right mouse click on selected structure: spawn unit
 ### renderer
 put green box around selected unit  
 spawn point indicator  
+scrolling
 
 ## todo:
 ### game loop
-
+62: scrolling works but now i can access past the first screen here
 
 ### renderer
+scrolling half done

@@ -1,6 +1,6 @@
 import math
 
-SPAWN_TIME = 5
+SPAWN_TIME = 30
 
 class EntityManager:
     def __init__(s):
