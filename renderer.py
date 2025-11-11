@@ -46,15 +46,14 @@ class Renderer:
 
                 # unit
                 if type(entity) == Unit:
-                    s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation)
+                    s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation, entity.color)
 
                 # structure
                 if isinstance(entity, Structure):
                     # set to centre of square
                     half = entity.size / 2
                     rect = Rect(entity.x - half, entity.y - half, entity.size, entity.size) # x,y, height, width
-                    color = (0, 0, 255)
-                    draw.rect( screen, color, rect )
+                    draw.rect( screen, entity.color, rect )
 
                     # draw cooldown
                     text_surface = s.font.render( str( round(entity.spawn_timer) ), True, (255, 255, 255) ) # Render the text white
@@ -81,8 +80,7 @@ class Renderer:
 
         # Function to draw an equilateral triangle
         # angle in degrees
-        def draw_triangle(s, screen, cx, cy, side_length, angle):
-            color = (255, 255, 255)
+        def draw_triangle(s, screen, cx, cy, side_length, angle, color = (255, 255, 255)):
 
             # Calculate the 3 points of the equilateral triangle
             height = side_length / (2 * math.sqrt(3))

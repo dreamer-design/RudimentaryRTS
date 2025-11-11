@@ -39,6 +39,15 @@ class Entity:
         s.rotation = rotation # degs from up
         s.size = size
         s.hp = s.max_hp = max_hp
+        s.team = team
+
+        if team == 0:
+            s.color = (0,0,255) # blue team
+        else:
+            s.color = (255,0,0) # red team
+
+        def take_damage(s, dmg):
+            s.hp = max(0, s.hp - dmg)
 
 
 class Unit(Entity):
@@ -47,6 +56,9 @@ class Unit(Entity):
             s.target = T
             s.rotation = s.point_to_target(*s.target)
             print(s.rotation)
+            s.range = 100 # radius
+            s.fire_rate = 1 # secs?
+            s.cooldown = s.fire_rate
         
         def point_to_target(s, x2, y2):
             # get the clockwise angle of rotation from straight (0) up to the secondary point located to the bottom right of screen
