@@ -10,10 +10,10 @@ class EntityManager:
     #     s.entities.append( Unit(x,y, rotation, size) )
 
     def addUnit(s, x, y, spawn, rotation=0, size=40, team=0):
-        s.entities.append( Unit(x,y, rotation, size, spawn) )
+        s.entities.append( Unit(x,y, rotation, size, spawn, team) )
 
     def addStructure(s, x, y, spawn_point= (100,100), team=0 ):
-        s.entities.append( Structure(x,y, spawn_point) )
+        s.entities.append( Structure(x,y, spawn_point, team) )
 
     def addNode(s, x, y ):
         s.entities.append( Node(x,y) )
@@ -35,7 +35,7 @@ class EntityManager:
 
 class Entity:
     def __init__(s, x, y, rotation, size, max_hp=100, team=0):
-        print("emit: ", x, y, rotation, size)
+        print("emit: ", x, y, rotation, size, team)
         s.x = x
         s.y = y
         s.rotation = rotation # degs from up
@@ -54,8 +54,8 @@ class Entity:
             s.hp = max(0, s.hp - dmg)
 
 class Unit(Entity):
-        def __init__(s, x, y, rotation=0, size=40, T= (1000, 700) ):
-            super().__init__(x, y, rotation, size)
+        def __init__(s, x, y, rotation=0, size=40, T= (1000, 700), team=0 ):
+            super().__init__(x, y, rotation, size, team=team)
             s.target = T
             s.rotation = s.point_to_target(*s.target)
             print(s.rotation)
@@ -86,8 +86,8 @@ class Structure(Entity):
         spawn = []
         spawn_timer = 0
 
-        def __init__(s, x, y, spawn_point=(100,100) ):
-            super().__init__(x, y, rotation=0, size=80)
+        def __init__(s, x, y, spawn_point=(100,100), team=0 ):
+            super().__init__(x, y, rotation=0, size=80, team=team)
             s.spawn = spawn_point
             s.spawn_timer = 0
             s.spawnable = True

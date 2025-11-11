@@ -5,7 +5,7 @@ from random import randint
 
 from pygame import time
 from pygame import event, QUIT
-from pygame import key, KEYDOWN, K_q, K_a, K_s, K_d, K_w, K_z, K_x, K_c
+from pygame import key, KEYDOWN, KMOD_SHIFT, K_q, K_a, K_s, K_d, K_w, K_z, K_x, K_c
 from pygame import mouse, MOUSEBUTTONDOWN
 
 import renderer as r
@@ -47,16 +47,21 @@ class GameLoop:
                     running = False
                 if ev.type == KEYDOWN:
                     keys = key.get_pressed()
+                    mods = key.get_mods()
+
                     if keys[K_q]:
                         s.running = False
                     if keys[K_z]:
-                        # x = randint(20,300); y = randint(20,300)
-                        # r = randint(0,90)       # clockwise
-                        s.manager.addUnit( *mouse.get_pos(), (500,500) )
+                        s.manager.addUnit( *mouse.get_pos(), (500,500), team=0 )
                     if keys[K_x]:
-                        s.manager.addStructure( *mouse.get_pos() )
+                        s.manager.addStructure( *mouse.get_pos(), team=0 )
+                    if keys[K_z] and (mods & KMOD_SHIFT):
+                        print("yes")
+                        s.manager.addUnit( *mouse.get_pos(), (500,500), team=1 )
+                    if keys[K_x] and (mods & KMOD_SHIFT):
+                        s.manager.addStructure( *mouse.get_pos(), team=1 )
                     if keys[K_c]:
-                        s.manager.addNode( *mouse.get_pos() )
+                        s.manager.addNode( *mouse.get_pos())
                 if ev.type == MOUSEBUTTONDOWN:
                     pos = mouse.get_pos()
                     ##### pos = (pos[0] + r.scroll_x, pos[1] + r.scroll_y)  # Adjust for the scrolling
