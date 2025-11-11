@@ -32,12 +32,13 @@ class EntityManager:
 
 
 class Entity:
-    def __init__(s, x, y, rotation, size):
+    def __init__(s, x, y, rotation, size, max_hp=100, team=0):
         print("emit: ", x, y, rotation, size)
         s.x = x
         s.y = y
         s.rotation = rotation # degs from up
         s.size = size
+        s.hp = s.max_hp = max_hp
 
 
 class Unit(Entity):
