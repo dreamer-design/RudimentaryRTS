@@ -6,14 +6,17 @@ class EntityManager:
     def __init__(s):
         s.entities = []
 
-    def addEntity(s, x, y, rotation=0, size=40):
-        s.entities.append( Unit(x,y, rotation, size) )
+    # def addEntity(s, x, y, rotation=0, size=40, team=0):
+    #     s.entities.append( Unit(x,y, rotation, size) )
 
-    def addUnit(s, x, y, spawn, rotation=0, size=40):
+    def addUnit(s, x, y, spawn, rotation=0, size=40, team=0):
         s.entities.append( Unit(x,y, rotation, size, spawn) )
 
-    def addStructure(s, x, y, spawn_point= (100,100) ):
+    def addStructure(s, x, y, spawn_point= (100,100), team=0 ):
         s.entities.append( Structure(x,y, spawn_point) )
+
+    def addNode(s, x, y ):
+        s.entities.append( Node(x,y) )
 
     def get_entity_at(s, pos):
         x, y = pos
@@ -30,7 +33,6 @@ class EntityManager:
             if hasattr(e, "update"):
                 e.update(dt)
 
-
 class Entity:
     def __init__(s, x, y, rotation, size, max_hp=100, team=0):
         print("emit: ", x, y, rotation, size)
@@ -41,14 +43,15 @@ class Entity:
         s.hp = s.max_hp = max_hp
         s.team = team
 
-        if team == 0:
+        if s.team == 0:
             s.color = (0,0,255) # blue team
-        else:
+        elif s.team == 1:
             s.color = (255,0,0) # red team
+        else:
+            s.color = (255,255,255); # white = neutral
 
         def take_damage(s, dmg):
             s.hp = max(0, s.hp - dmg)
-
 
 class Unit(Entity):
         def __init__(s, x, y, rotation=0, size=40, T= (1000, 700) ):
@@ -79,7 +82,6 @@ class Unit(Entity):
             # update roation angle
             s.rotation = s.point_to_target(tx,ty)
 
-
 class Structure(Entity):
         spawn = []
         spawn_timer = 0
@@ -108,4 +110,11 @@ class Structure(Entity):
                 # Handle cooldown
                 s.spawnable = False
                 s.spawn_timer = SPAWN_TIME
+
+class Node(Entity):
+    types = 0 # resource, health regen, upgrade
+
+    def __init__(s, x, y ):
+        super().__init__(x, y, rotation=0, size=80, max_hp=9999, team=None)
+
 
