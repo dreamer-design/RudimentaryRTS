@@ -3,11 +3,13 @@ import math
 SPAWN_TIME = 30
 
 class EntityManager:
-    def __init__(s):
-        s.entities = []
+    entities = []
 
-    # def addEntity(s, x, y, rotation=0, size=40, team=0):
-    #     s.entities.append( Unit(x,y, rotation, size) )
+    # def __init__(s):
+
+
+    # def addEntity(s, e):
+    #     s.entities.append( e )
 
     def addUnit(s, x, y, spawn, rotation=0, size=40, team=0):
         s.entities.append( Unit(x,y, rotation, size, spawn, team) )
@@ -17,6 +19,11 @@ class EntityManager:
 
     def addNode(s, x, y ):
         s.entities.append( Node(x,y) )
+
+    def addProjectile( s, x, y, target):
+        print("here")
+        s.entities.append( Projectile(x, y, target) )
+        print("here")
 
     def get_entity_at(s, pos):
         x, y = pos
@@ -28,10 +35,11 @@ class EntityManager:
 
     def update(s, dt):
         for e in s.entities:
-            # if isinstance(e, Unit):
-            #     e.update(dt)
             if hasattr(e, "update"):
-                e.update(dt)
+                e.update(dt, s)
+
+        # Remove dead entities
+        # s.entities = [e for e in s.entities if e.hp > 0]
 
 class Entity:
     def __init__(s, x, y, rotation, size, max_hp=100, team=0):
@@ -50,18 +58,21 @@ class Entity:
         else:
             s.color = (255,255,255); # white = neutral
 
-        def take_damage(s, dmg):
-            s.hp = max(0, s.hp - dmg)
+    def take_damage(s, dmg):
+        s.hp = max(0, s.hp - dmg)
 
 class Unit(Entity):
         def __init__(s, x, y, rotation=0, size=40, T= (1000, 700), team=0 ):
             super().__init__(x, y, rotation, size, team=team)
-            s.target = T
-            s.rotation = s.point_to_target(*s.target)
-            print(s.rotation)
-            s.range = 100 # radius
-            s.fire_rate = 1 # secs?
-            s.cooldown = s.fire_rate
+            s.x = x
+            s.y = y
+            s.moveTo = T
+            s.rotation = s.point_to_target(*s.moveTo)
+            s.range = 200      # radius
+            s.fire_rate = 1.0  # secsonds between shots
+            s.cooldown = 0     # able to shoot immediately
+            s.damage = 1
+            s.target = None
         
         def point_to_target(s, x2, y2):
             # get the clockwise angle of rotation from straight (0) up to the secondary point located to the bottom right of screen
@@ -72,15 +83,49 @@ class Unit(Entity):
             angle_deg = math.degrees(angle_rad)
             return angle_deg
 
-        def update(s, dt):
-            tx, ty = s.target
+        def update(s, dt, manager):
+            # move
+            tx, ty = s.moveTo
             dx, dy = tx - s.x, ty - s.y
             dist = math.hypot(dx, dy)
             if dist > 1:
                 s.x += (dx / dist) * 100 * dt  # speed = 100 px/s
                 s.y += (dy / dist) * 100 * dt
+
             # update roation angle
-            s.rotation = s.point_to_target(tx,ty)
+            if s.target != None:
+                s.rotation = s.point_to_target( s.target.x, s.target.y )
+            else:
+                s.rotation = s.point_to_target(s.moveTo[0],s.moveTo[1])
+
+            # cooldown
+            if s.cooldown > 0:
+                s.cooldown -= dt
+
+            # try to shoot
+            if s.cooldown <= 0:
+                s.target = s.find_target( EntityManager.entities )
+
+                # instant damage
+                if s.target:
+                    s.moveTo = (s.x, s.y) # stop to shoot
+                    s.target.take_damage(s.damage)
+                    s.cooldown = s.fire_rate
+                # add Projectile
+                    manager.addProjectile( s.x, s.y, s.target )
+
+        def find_target(s, entities):
+            enemies = [e for e in entities if e.team != s.team and e.hp > 0]
+            closest = None
+            min_dist = float("inf")
+
+            for e in enemies:
+                dist = math.hypot(e.x - s.x, e.y - s.y)
+                if dist < s.range and dist < min_dist:
+                    min_dist = dist
+                    closest = e
+
+            return closest
 
 class Structure(Entity):
         spawn = []
@@ -96,7 +141,7 @@ class Structure(Entity):
             # s.x = x; s.y = y
             s.spawn = (x, y)
 
-        def update(s, dt):
+        def update(s, dt, manager):
             if not s.spawnable:
                 s.spawn_timer -= dt
                 if s.spawn_timer <= 0:
@@ -117,4 +162,16 @@ class Node(Entity):
     def __init__(s, x, y ):
         super().__init__(x, y, rotation=0, size=80, max_hp=9999, team=None)
 
+# fixme: projectile has a health bar too.
+class Projectile(Entity):
+    def __init__(s, x, y, target):
+        super().__init__(x, y, rotation=0, size=80, max_hp=9999, team=None)
+        s.target = target
 
+    def update(s, dt, manager):
+        # move
+        tx, ty = s.target.x, s.target.y
+        dx, dy = tx - s.x, ty - s.y
+        dist = math.hypot(dx, dy)
+        s.x += (dx / dist) * 100 * dt  # speed = 100 px/s
+        s.y += (dy / dist) * 100 * dt

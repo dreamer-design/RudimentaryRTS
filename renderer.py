@@ -4,7 +4,7 @@ from pygame import Rect
 from pygame import font
 import math
 
-from entityManager import Unit, Structure, Node
+from entityManager import Unit, Structure, Node, Projectile
 # (0,0) is top left
 
 # Screen settings
@@ -66,6 +66,10 @@ class Renderer:
                 # Node
                 if isinstance(entity, Node):
                     s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation, entity.color)
+
+                # Projectile
+                if isinstance(entity, Projectile):
+                    draw.circle(screen, (0, 255, 0), (int(entity.x), int(entity.y)), 5)
 
                 # Draw the portion of the buffer that we want to show on the screen
             buffer.blit(screen, (0, 0), (scroll_x, scroll_y, screen_width, screen_height))

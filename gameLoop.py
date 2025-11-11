@@ -51,15 +51,14 @@ class GameLoop:
 
                     if keys[K_q]:
                         s.running = False
-                    if keys[K_z]:
-                        s.manager.addUnit( *mouse.get_pos(), (500,500), team=0 )
-                    if keys[K_x]:
-                        s.manager.addStructure( *mouse.get_pos(), team=0 )
                     if keys[K_z] and (mods & KMOD_SHIFT):
-                        print("yes")
                         s.manager.addUnit( *mouse.get_pos(), (500,500), team=1 )
+                    elif keys[K_z]:
+                        s.manager.addUnit( *mouse.get_pos(), (500,500), team=0 )
                     if keys[K_x] and (mods & KMOD_SHIFT):
                         s.manager.addStructure( *mouse.get_pos(), team=1 )
+                    elif keys[K_x]:
+                        s.manager.addStructure( *mouse.get_pos(), team=0 )
                     if keys[K_c]:
                         s.manager.addNode( *mouse.get_pos())
                 if ev.type == MOUSEBUTTONDOWN:
@@ -73,7 +72,8 @@ class GameLoop:
 
                         if isinstance(s.selected, Unit):
                             # Always move the unit to clicked position
-                            s.selected.target = pos
+                            s.selected.moveTo = pos
+                            s.selected.point_to_target(*pos)
 
                         elif isinstance(s.selected, Structure):
                             if clicked == s.selected:
