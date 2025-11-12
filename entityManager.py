@@ -2,6 +2,7 @@ import math
 # import renderer as R
 
 SPAWN_TIME = 30
+MAX_HP = 5
 
 class EntityManager:
     entities = []
@@ -15,6 +16,9 @@ class EntityManager:
 
     def addUnit(s, x, y, spawn, rotation=0, size=40, team=0):
         s.entities.append( Unit(x,y, rotation, size, spawn, team) )
+
+    def removeEntity(s, e):
+        s.entities.remove(e)
 
     def addStructure(s, x, y, spawn_point= (100,100), team=0 ):
         s.entities.append( Structure(x,y, spawn_point, team) )
@@ -32,23 +36,32 @@ class EntityManager:
         x, y = pos
         for e in s.entities:
             if abs(e.x - x) < e.size and abs(e.y - y) < e.size:
-                print(str(e) + "selected")
+                # print(str(e) + "selected")
                 return e
         return None
 
     def update(s, dt):
         for e in s.entities:
-            if hasattr(e, "hasReached") and e.hasReached():
-                s.removeProjectile(e)
-
+            # first update position
             if hasattr(e, "update"):
                 e.update(dt, s)
 
-        # Remove dead entities
-        # s.entities = [e for e in s.entities if e.hp > 0]
+            # projectiles
+            if hasattr(e, "hasReached"):
+                hit = e.collision(s.entities)
+                if hit is not None: # check Collisions
+                    hit.take_damage(1)
+                    s.removeProjectile(e)
+
+                elif e.hasReached():
+                    s.removeProjectile(e)
+
+            # Remove dead entities
+            if e.hp == 0:
+                s.removeEntity(e)
 
 class Entity:
-    def __init__(s, x, y, rotation, size, max_hp=100, team=0):
+    def __init__(s, x, y, rotation, size, max_hp=MAX_HP, team=0):
         # print("emit: ", x, y, rotation, size, team)
         s.x = x
         s.y = y
@@ -66,6 +79,28 @@ class Entity:
 
     def take_damage(s, dmg):
         s.hp = max(0, s.hp - dmg)
+
+    def distance_to(s, other_entity):
+        # Calculate Euclidean distance between two entities
+        return math.sqrt((s.x - other_entity.x) ** 2 + (s.y - other_entity.y) ** 2)
+
+    def collision(s, entities):
+        # Loop through all other entities and check for collisions
+        for entity in entities:
+            if entity == s:  # Skip checking the projectile with itself
+                continue
+
+            # Check if the entities are on the same team
+            if entity.team == s.team:
+                continue
+
+            # Check if the distance between their centers is less than the sum of their radii (size)
+            distance = s.distance_to(entity)
+            # if distance < (s.size + entity.size):  # Collision detected
+            if distance < 1:  # Collision detected
+                return entity  # Return the first entity hit (can modify to return more or all hits)
+
+        return None  # No collision
 
 class Unit(Entity):
         def __init__(s, x, y, rotation=0, size=40, T= (1000, 700), team=0 ):
@@ -113,7 +148,7 @@ class Unit(Entity):
                 s.target = s.find_target( EntityManager.entities )
 
                 if s.target != None:
-                    s.target.take_damage(s.damage)
+                    # s.target.take_damage(s.damage)
                     s.cooldown = s.fire_rate
                     manager.addProjectile( s.x, s.y, s.target ) # add Projectile
 
@@ -165,11 +200,10 @@ class Node(Entity):
     def __init__(s, x, y ):
         super().__init__(x, y, rotation=0, size=80, max_hp=9999, team=None)
 
-# fixme: projectile has a health bar too.
+# todo: collision detection
 class Projectile(Entity):
     def __init__(s, x, y, target):
         super().__init__(x, y, rotation=0, size=80, max_hp=9999, team=None)
-        # s.target = target
         s.moveToX, s.moveToY = target.x, target.y
 
     def update(s, dt, manager):
@@ -178,6 +212,14 @@ class Projectile(Entity):
         if dist > 0:
             s.x += (dx / dist) * 100 * dt  # speed = 100 px/s
             s.y += (dy / dist) * 100 * dt
+
+    def collision(s, entities):
+        # Check if the projectile hits any entity in the list
+        hit_entity = super().collision(entities)  # Use the parent class's collision method
+        if hit_entity:
+            print(f"Projectile hit entity at position ({hit_entity.x}, {hit_entity.y})")
+            return hit_entity
+        return None
 
     def hasReached(s):
         epsilon = 1  # small threshold for floating-point comparison
