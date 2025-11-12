@@ -11,6 +11,10 @@ from entityManager import Unit, Structure, Node, Projectile
 WIDTH, HEIGHT = 1900, 1000
 MAPW, MAPH = 2000 , 2000
 
+MINIMAP_SIZE = 200          # pixel size of the minimap square
+MINIMAP_SCALE = 0.1         # world-to-minimap scale
+MINIMAP_MARGIN = 10         # offset from screen edges
+
 # screen vars
 # screen = display.set_mode((NW * TILE, NH * TILE))
 buffer = display.set_mode((WIDTH, HEIGHT))
@@ -18,7 +22,7 @@ screen = Surface( (MAPW, MAPH) )
 
 # Scroll position
 screen_width, screen_height = WIDTH, HEIGHT
-scroll_x, scroll_y = 0, 0
+scroll_x, scroll_y = 750, 500
 scroll_speed = 8  # Speed of scrolling
 edge_threshold = 80  # Threshold distance from the edge to trigger scrolling
 
@@ -82,6 +86,7 @@ class Renderer:
                 # Draw the portion of the buffer that we want to show on the screen
             buffer.blit(screen, (0, 0), (scroll_x, scroll_y, screen_width, screen_height))
 
+            s.draw_minimap(buffer, s.toDraw)
             display.flip()
 
         # Function to rotate a point around the center
@@ -111,3 +116,29 @@ class Renderer:
             # Draw the triangle
             draw.polygon(screen, color, [top, left, right])
             draw.line(screen, (255, 0 ,0) , left, right )
+
+        def draw_minimap(self, screen, entities):
+            # Position (top-right corner)
+            mx = WIDTH - MINIMAP_SIZE - MINIMAP_MARGIN
+            my = MINIMAP_MARGIN
+
+            # Background rectangle
+            draw.rect(screen, (40, 40, 40), Rect(mx, my, MINIMAP_SIZE, MINIMAP_SIZE))
+
+            for e in entities:
+                # Only show units and structures
+                if not isinstance(e, (Unit, Structure)):
+                    continue
+
+                # Convert world → minimap coordinates
+                px = mx + e.x * MINIMAP_SCALE
+                py = my + e.y * MINIMAP_SCALE
+
+                # Choose team color
+                color = (0, 0, 255) if e.team == 0 else (255, 0, 0)
+
+                # Units as small circles; structures as small squares
+                if isinstance(e, Unit):
+                    draw.circle(screen, color, (int(px), int(py)), 2)
+                elif isinstance(e, Structure):
+                    draw.rect(screen, color, Rect(px - 2, py - 2, 4, 4))
