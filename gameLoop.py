@@ -30,6 +30,8 @@ class GameLoop:
             # edge scroll
             # Get mouse position
             mouse_x, mouse_y = mouse.get_pos()
+            AMouse_x = mouse_x + R.scroll_x
+            AMouse_y = mouse_y + R.scroll_y
 
             # Check if the mouse is near any edge and scroll accordingly
             if mouse_x < R.edge_threshold:  # Mouse is near the left edge
@@ -58,28 +60,27 @@ class GameLoop:
                     if keys[K_q]:
                         s.running = False
                     if keys[K_z] and (mods & KMOD_SHIFT):
-                        s.manager.addUnit( *mouse.get_pos(), (500,500), team=1 )
+                        s.manager.addUnit( AMouse_x, AMouse_y, (1500,1500), team=1 )
                     elif keys[K_z]:
-                        s.manager.addUnit( *mouse.get_pos(), (500,500), team=0 )
+                        s.manager.addUnit( AMouse_x, AMouse_y, (500,500), team=0 )
                     if keys[K_x] and (mods & KMOD_SHIFT):
-                        s.manager.addStructure( *mouse.get_pos(), team=1 )
+                        s.manager.addStructure( AMouse_x, AMouse_y, team=1 )
                     elif keys[K_x]:
-                        s.manager.addStructure( *mouse.get_pos(), team=0 )
+                        s.manager.addStructure( AMouse_x, AMouse_y, team=0 )
                     if keys[K_c]:
-                        s.manager.addNode( *mouse.get_pos())
+                        s.manager.addNode( AMouse_x, AMouse_y)
                 if ev.type == MOUSEBUTTONDOWN:
-                    pos = mouse.get_pos()
-                    ##### pos = (pos[0] + r.scroll_x, pos[1] + r.scroll_y)  # Adjust for the scrolling
                     if ev.button == 1:  # Left click -> select
-                        s.selected = s.manager.get_entity_at( pos ) # return null/pos
+                        # s.selected = s.manager.get_entity_at( pos ) # return null/pos
+                        s.selected = s.manager.get_entity_at( (AMouse_x, AMouse_y) ) # return null/pos
 
                     elif ev.button == 3 and s.selected:  # Right click
-                        clicked = s.manager.get_entity_at(pos)
+                        clicked = s.manager.get_entity_at( (AMouse_x, AMouse_y) )
 
                         if isinstance(s.selected, Unit):
                             # Always move the unit to clicked position
-                            s.selected.moveTo = pos
-                            s.selected.point_to_target(*pos)
+                            s.selected.moveTo = (AMouse_x, AMouse_y)
+                            s.selected.point_to_target(AMouse_x, AMouse_y)
 
                         elif isinstance(s.selected, Structure):
                             if clicked == s.selected:
@@ -87,5 +88,5 @@ class GameLoop:
                                 s.selected.spawn_unit(s.manager)
                             else:
                                 # Right-click elsewhere -> set spawn point
-                                s.selected.set_spawn(*pos)
+                                s.selected.set_spawn(AMouse_x, AMouse_y)
 

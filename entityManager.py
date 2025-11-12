@@ -26,10 +26,7 @@ class EntityManager:
         s.entities.append( Node(x,y) )
 
     def addProjectile( s, x, y, target):
-        print("here")
         s.entities.append( Projectile(x, y, target) )
-        print("here")
-
     def get_entity_at(s, pos):
         x, y = pos
         for e in s.entities:
@@ -48,7 +45,7 @@ class EntityManager:
 
 class Entity:
     def __init__(s, x, y, rotation, size, max_hp=100, team=0):
-        print("emit: ", x, y, rotation, size, team)
+        # print("emit: ", x, y, rotation, size, team)
         s.x = x
         s.y = y
         s.rotation = rotation # degs from up
