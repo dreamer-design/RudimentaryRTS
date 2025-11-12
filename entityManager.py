@@ -5,13 +5,10 @@ SPAWN_TIME = 30
 
 class EntityManager:
     entities = []
-    # startPylons = []
     buildRadius = 500
 
     def __init__(s):
-        # s.startPylons[0], s.startPylons[1] = (0 + s.buildRadius, 0 + s.buildRadius)
         s.startPylons = ( (0 + s.buildRadius, 0 + s.buildRadius), (2000 - s.buildRadius, 2000 - s.buildRadius) )
-
 
     # def addEntity(s, e):
     #     s.entities.append( e )
@@ -27,6 +24,10 @@ class EntityManager:
 
     def addProjectile( s, x, y, target):
         s.entities.append( Projectile(x, y, target) )
+
+    def removeProjectile(s, target):
+        s.entities.remove(target)
+
     def get_entity_at(s, pos):
         x, y = pos
         for e in s.entities:
@@ -37,6 +38,9 @@ class EntityManager:
 
     def update(s, dt):
         for e in s.entities:
+            if hasattr(e, "hasReached") and e.hasReached():
+                s.removeProjectile(e)
+
             if hasattr(e, "update"):
                 e.update(dt, s)
 
@@ -108,13 +112,10 @@ class Unit(Entity):
             if s.cooldown <= 0:
                 s.target = s.find_target( EntityManager.entities )
 
-                # instant damage
-                if s.target:
-                    # s.moveTo = (s.x, s.y) # stop to shoot
+                if s.target != None:
                     s.target.take_damage(s.damage)
                     s.cooldown = s.fire_rate
-                # add Projectile
-                    manager.addProjectile( s.x, s.y, s.target )
+                    manager.addProjectile( s.x, s.y, s.target ) # add Projectile
 
         def find_target(s, entities):
             enemies = [e for e in entities if e.team != s.team and e.hp > 0]
@@ -168,13 +169,17 @@ class Node(Entity):
 class Projectile(Entity):
     def __init__(s, x, y, target):
         super().__init__(x, y, rotation=0, size=80, max_hp=9999, team=None)
-        s.target = target
+        # s.target = target
+        s.moveToX, s.moveToY = target.x, target.y
 
     def update(s, dt, manager):
-        # move
-        tx, ty = s.target.x, s.target.y
-        dx, dy = tx - s.x, ty - s.y
+        dx, dy = s.moveToX - s.x, s.moveToY - s.y
         dist = math.hypot(dx, dy)
         if dist > 0:
             s.x += (dx / dist) * 100 * dt  # speed = 100 px/s
             s.y += (dy / dist) * 100 * dt
+
+    def hasReached(s):
+        epsilon = 1  # small threshold for floating-point comparison
+        dist = math.hypot(s.x - s.moveToX, s.y - s.moveToY)
+        return dist < epsilon
