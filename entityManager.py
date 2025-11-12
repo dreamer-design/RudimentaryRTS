@@ -1,11 +1,16 @@
 import math
+import renderer as R
 
 SPAWN_TIME = 30
 
 class EntityManager:
     entities = []
+    # startPylons = []
+    buildRadius = 500
 
-    # def __init__(s):
+    def __init__(s):
+        # s.startPylons[0], s.startPylons[1] = (0 + s.buildRadius, 0 + s.buildRadius)
+        s.startPylons = ( (0 + s.buildRadius, 0 + s.buildRadius), (2000 - s.buildRadius, 2000 - s.buildRadius) )
 
 
     # def addEntity(s, e):
@@ -108,7 +113,7 @@ class Unit(Entity):
 
                 # instant damage
                 if s.target:
-                    s.moveTo = (s.x, s.y) # stop to shoot
+                    # s.moveTo = (s.x, s.y) # stop to shoot
                     s.target.take_damage(s.damage)
                     s.cooldown = s.fire_rate
                 # add Projectile
@@ -173,5 +178,6 @@ class Projectile(Entity):
         tx, ty = s.target.x, s.target.y
         dx, dy = tx - s.x, ty - s.y
         dist = math.hypot(dx, dy)
-        s.x += (dx / dist) * 100 * dt  # speed = 100 px/s
-        s.y += (dy / dist) * 100 * dt
+        if dist > 0:
+            s.x += (dx / dist) * 100 * dt  # speed = 100 px/s
+            s.y += (dy / dist) * 100 * dt

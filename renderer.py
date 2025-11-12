@@ -13,7 +13,7 @@ WIDTH, HEIGHT = 1900, 1000
 # screen vars
 # screen = display.set_mode((NW * TILE, NH * TILE))
 buffer = display.set_mode((WIDTH, HEIGHT))
-screen = Surface( (WIDTH*2, HEIGHT*2) )
+screen = Surface( (2000, 2000) )
 
 # Scroll position
 screen_width, screen_height = WIDTH, HEIGHT
@@ -23,13 +23,19 @@ edge_threshold = 50  # Threshold distance from the edge to trigger scrolling
 
 
 class Renderer:
-        def __init__(s, entities):
+        def __init__(s, manager, entities):
             s.toDraw = entities
+            s.manager = manager
             # Define the font and size
             s.font = font.Font(None, 74)  # None means default font, 74 is the size
 
         def render(s, selected_unit):
             screen.fill((100, 100, 100))  # grey
+
+            # start pylons
+            for pos in s.manager.startPylons:
+                draw.circle(screen, (200, 200, 200), pos, 5)
+                draw.circle(screen, (200, 200, 200), pos, s.manager.buildRadius, width=2)
 
             if( selected_unit ):
                 pos = (selected_unit.x,selected_unit.y)

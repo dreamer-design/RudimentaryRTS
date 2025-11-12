@@ -17,7 +17,7 @@ class GameLoop:
         s.running = True
         s.deltaTime = 0
         s.manager = EntityManager()
-        s.display = Renderer( s.manager.entities )
+        s.display = Renderer( s.manager, s.manager.entities )
         s.selected = None # currently selected unit
 
     def loop(s):
