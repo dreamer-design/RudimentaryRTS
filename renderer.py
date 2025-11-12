@@ -9,17 +9,18 @@ from entityManager import Unit, Structure, Node, Projectile
 
 # Screen settings
 WIDTH, HEIGHT = 1900, 1000
+MAPW, MAPH = 2000 , 2000
 
 # screen vars
 # screen = display.set_mode((NW * TILE, NH * TILE))
 buffer = display.set_mode((WIDTH, HEIGHT))
-screen = Surface( (2000, 2000) )
+screen = Surface( (MAPW, MAPH) )
 
 # Scroll position
 screen_width, screen_height = WIDTH, HEIGHT
 scroll_x, scroll_y = 0, 0
-scroll_speed = 5  # Speed of scrolling
-edge_threshold = 50  # Threshold distance from the edge to trigger scrolling
+scroll_speed = 8  # Speed of scrolling
+edge_threshold = 80  # Threshold distance from the edge to trigger scrolling
 
 
 class Renderer:

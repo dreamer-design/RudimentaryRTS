@@ -8,7 +8,7 @@ from pygame import event, QUIT
 from pygame import key, KEYDOWN, KMOD_SHIFT, K_q, K_a, K_s, K_d, K_w, K_z, K_x, K_c
 from pygame import mouse, MOUSEBUTTONDOWN
 
-import renderer as r
+import renderer as R
 
 clock = time.Clock()
 
@@ -32,14 +32,20 @@ class GameLoop:
             mouse_x, mouse_y = mouse.get_pos()
 
             # Check if the mouse is near any edge and scroll accordingly
-            if mouse_x < r.edge_threshold:  # Mouse is near the left edge
-                r.scroll_x -= r.scroll_speed
-            if mouse_x > r.screen_width - r.edge_threshold:  # Mouse is near the right edge
-                r.scroll_x += r.scroll_speed
-            if mouse_y < r.edge_threshold:  # Mouse is near the top edge
-                r.scroll_y -= r.scroll_speed
-            if mouse_y > r.screen_height - r.edge_threshold:  # Mouse is near the bottom edge
-                r.scroll_y += r.scroll_speed
+            if mouse_x < R.edge_threshold:  # Mouse is near the left edge
+                R.scroll_x -= R.scroll_speed
+            if mouse_x > R.screen_width - R.edge_threshold:  # Mouse is near the right edge
+                R.scroll_x += R.scroll_speed
+            if mouse_y < R.edge_threshold:  # Mouse is near the top edge
+                R.scroll_y -= R.scroll_speed
+            if mouse_y > R.screen_height - R.edge_threshold:  # Mouse is near the bottom edge
+                R.scroll_y += R.scroll_speed
+
+            # Ensure scrolling doesn't go beyond the map boundaries
+            R.scroll_x = max(0, R.scroll_x)                        # left edge
+            R.scroll_x = min(R.MAPW - R.screen_width, R.scroll_x)  # right edge
+            R.scroll_y = max(0, R.scroll_y)                        # top edge
+            R.scroll_y = min(R.MAPH - R.screen_height, R.scroll_y) # bottom edge
 
             # input handle
             for ev in event.get():

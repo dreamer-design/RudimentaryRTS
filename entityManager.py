@@ -1,5 +1,5 @@
 import math
-import renderer as R
+# import renderer as R
 
 SPAWN_TIME = 30
 
