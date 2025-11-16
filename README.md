@@ -1,26 +1,16 @@
 # RudimentaryRTS
 a reduced real time strategy implementation  
 
-## implemented:
-### game loop
-key A: spawn unit  
-key K: spawn structure  
-select unit: left mouse click  
-move unit: right mouse click  
+select unit/structure: left mouse click  
 
-timer, SPAWN_TIME constant, countdown in seconds, enable spawnable  
-right mouse click on structure. set spawn point  
-right mouse click on selected structure: spawn unit  
+unit: right mouse click  -> move  
+structure: right  mouse click map -> set spawn point  
+structure: right mouse click on structure again: spawn unit  
 
+button next to minimap  
+left click: place blue team factory  
+right click: place red team factory  
 
-### renderer
-put green box around selected unit  
-spawn point indicator  
-scrolling
-
-## todo:
-### game loop
-62: scrolling works but now i can access past the first screen here
-
-### renderer
-scrolling half done
+debug keys:  
+(shift) / key A: spawn unit (red/blue)  
+(shift) / key K: spawn structure  
