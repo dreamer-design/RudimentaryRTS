@@ -7,86 +7,76 @@ import math
 from entityManager import Unit, Structure, Node, Projectile
 # (0,0) is top left
 
-# Screen settings
-WIDTH, HEIGHT = 1900, 1000
-MAPW, MAPH = 2000 , 2000
-
 MINIMAP_SIZE = 200          # pixel size of the minimap square
 MINIMAP_SCALE = 0.1         # world-to-minimap scale
 MINIMAP_MARGIN = 10         # offset from screen edges
 
-# screen vars
-# screen = display.set_mode((NW * TILE, NH * TILE))
-buffer = display.set_mode((WIDTH, HEIGHT))
-screen = Surface( (MAPW, MAPH) )
-
-# Scroll position
-screen_width, screen_height = WIDTH, HEIGHT
-scroll_x, scroll_y = 750, 500
-scroll_speed = 8  # Speed of scrolling
-edge_threshold = 80  # Threshold distance from the edge to trigger scrolling
-
+# map vars
+MAPW, MAPH = 2000 , 2000
+map_buffer = Surface( (MAPW, MAPH) )
 
 class Renderer:
-        def __init__(s, manager, entities):
+        def __init__(s, screen, manager, entities):
+            s.screen = screen
             s.toDraw = entities
             s.manager = manager
             # Define the font and size
             s.font = font.Font(None, 74)  # None means default font, 74 is the size
 
-        def render(s, selected_unit):
-            screen.fill((100, 100, 100))  # grey
+        def render(s, selected_unit, scroll_x, scroll_y):
+            map_buffer.fill((100, 100, 100))  # grey
 
             # start pylons
             for pos in s.manager.startPylons:
-                draw.circle(screen, (200, 200, 200), pos, 5)
-                draw.circle(screen, (200, 200, 200), pos, s.manager.buildRadius, width=2)
+                draw.circle(map_buffer, (200, 200, 200), pos, 5)
+                draw.circle(map_buffer, (200, 200, 200), pos, s.manager.buildRadius, width=2)
 
             if( selected_unit ):
                 pos = (selected_unit.x,selected_unit.y)
                 sz = selected_unit.size
-                draw.circle(screen, (0, 255, 0), pos, sz) # s, c, center, rad, width
+                draw.circle(map_buffer, (0, 255, 0), pos, sz) # s, c, center, rad, width
 
             for entity in s.toDraw:
                 # all
                 if entity.hp < 900:
                     bar_width = entity.size
                     health_ratio = entity.hp / entity.max_hp
-                    draw.rect(screen, (255,0,0), Rect(entity.x -bar_width/2, entity.y - entity.size/2-10, bar_width, 5))
-                    draw.rect(screen, (0,255,0), Rect(entity.x - bar_width/2, entity.y-entity.size/2-10, bar_width * health_ratio, 5))
+                    draw.rect(map_buffer, (255,0,0), Rect(entity.x -bar_width/2, entity.y - entity.size/2-10, bar_width, 5))
+                    draw.rect(map_buffer, (0,255,0), Rect(entity.x - bar_width/2, entity.y-entity.size/2-10, bar_width * health_ratio, 5))
 
                 # unit
                 if type(entity) == Unit:
-                    s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation, entity.color)
+                    s.draw_triangle(map_buffer, entity.x, entity.y, entity.size, entity.rotation, entity.color)
 
                 # structure
                 if isinstance(entity, Structure):
                     # set to centre of square
                     half = entity.size / 2
                     rect = Rect(entity.x - half, entity.y - half, entity.size, entity.size) # x,y, height, width
-                    draw.rect( screen, entity.color, rect )
+                    draw.rect( map_buffer, entity.color, rect )
 
                     # draw cooldown
                     text_surface = s.font.render( str( round(entity.spawn_timer) ), True, (255, 255, 255) ) # Render the text white
-                    screen.blit(text_surface, (entity.x, entity.y) )
+                    map_buffer.blit(text_surface, (entity.x, entity.y) )
 
                     # Draw spawn point indicator
                     if entity.spawn:
                         sx, sy = entity.spawn
-                        draw.circle(screen, (255, 255, 0), (int(sx), int(sy)), 5)
+                        draw.circle(map_buffer, (255, 255, 0), (int(sx), int(sy)), 5)
 
                 # Node
                 if isinstance(entity, Node):
-                    s.draw_triangle(screen, entity.x, entity.y, entity.size, entity.rotation, entity.color)
+                    s.draw_triangle(map_buffer, entity.x, entity.y, entity.size, entity.rotation, entity.color)
 
                 # Projectile
                 if isinstance(entity, Projectile):
-                    draw.circle(screen, (0, 255, 0), (int(entity.x), int(entity.y)), 5)
+                    draw.circle(map_buffer, (0, 255, 0), (int(entity.x), int(entity.y)), 5)
 
                 # Draw the portion of the buffer that we want to show on the screen
-            buffer.blit(screen, (0, 0), (scroll_x, scroll_y, screen_width, screen_height))
+            # s.screen.blit(map_buffer, (0, 0), (scroll_x, scroll_y, screen_width, screen_height))
+            s.screen.blit(map_buffer, (0, 0), (scroll_x, scroll_y, s.screen.get_width(), s.screen.get_height() ))
 
-            s.draw_minimap(buffer, s.toDraw)
+            s.draw_minimap(s.screen, s.toDraw)
             display.flip()
 
         # Function to rotate a point around the center
@@ -100,7 +90,7 @@ class Renderer:
 
         # Function to draw an equilateral triangle
         # angle in degrees
-        def draw_triangle(s, screen, cx, cy, side_length, angle, color = (255, 255, 255)):
+        def draw_triangle(s, map_buffer, cx, cy, side_length, angle, color = (255, 255, 255)):
 
             # Calculate the 3 points of the equilateral triangle
             height = side_length / (2 * math.sqrt(3))
@@ -114,16 +104,17 @@ class Renderer:
             right = s.rotate_point(right[0], right[1], cx, cy, angle)
 
             # Draw the triangle
-            draw.polygon(screen, color, [top, left, right])
-            draw.line(screen, (255, 0 ,0) , left, right )
+            draw.polygon(map_buffer, color, [top, left, right])
+            draw.line(map_buffer, (255, 0 ,0) , left, right )
 
-        def draw_minimap(self, screen, entities):
+        def draw_minimap(self, map_buffer, entities):
             # Position (top-right corner)
-            mx = WIDTH - MINIMAP_SIZE - MINIMAP_MARGIN
+            # mx = WIDTH - MINIMAP_SIZE - MINIMAP_MARGIN
+            mx = 0
             my = MINIMAP_MARGIN
 
             # Background rectangle
-            draw.rect(screen, (40, 40, 40), Rect(mx, my, MINIMAP_SIZE, MINIMAP_SIZE))
+            draw.rect(map_buffer, (40, 40, 40), Rect(mx, my, MINIMAP_SIZE, MINIMAP_SIZE))
 
             for e in entities:
                 # Only show units and structures
@@ -139,6 +130,6 @@ class Renderer:
 
                 # Units as small circles; structures as small squares
                 if isinstance(e, Unit):
-                    draw.circle(screen, color, (int(px), int(py)), 2)
+                    draw.circle(map_buffer, color, (int(px), int(py)), 2)
                 elif isinstance(e, Structure):
-                    draw.rect(screen, color, Rect(px - 2, py - 2, 4, 4))
+                    draw.rect(map_buffer, color, Rect(px - 2, py - 2, 4, 4))

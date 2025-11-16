@@ -1,4 +1,5 @@
 from renderer import Renderer
+import renderer as R
 
 from entityManager import EntityManager, Unit, Structure
 from random import randint
@@ -8,46 +9,50 @@ from pygame import event, QUIT
 from pygame import key, KEYDOWN, KMOD_SHIFT, K_q, K_a, K_s, K_d, K_w, K_z, K_x, K_c
 from pygame import mouse, MOUSEBUTTONDOWN
 
-import renderer as R
+# Scroll position
+scroll_speed = 8  # Speed of scrolling
+edge_threshold = 80  # Threshold distance from the edge to trigger scrolling
 
 clock = time.Clock()
 
 class GameLoop:
-    def __init__(s):
+    def __init__(s, screen):
+        s.screen = screen
         s.running = True
         s.deltaTime = 0
         s.manager = EntityManager()
-        s.display = Renderer( s.manager, s.manager.entities )
+        s.display = Renderer( screen, s.manager, s.manager.entities )
         s.selected = None # currently selected unit
+        s.scroll_x, s.scroll_y = 750, 500
 
     def loop(s):
         while s.running:
             # update
             dt = clock.tick(60) / 1000
             s.manager.update(dt)
-            s.display.render(s.selected)
+            s.display.render(s.selected, s.scroll_x, s.scroll_y)
 
             # edge scroll
             # Get mouse position
             mouse_x, mouse_y = mouse.get_pos()
-            AMouse_x = mouse_x + R.scroll_x
-            AMouse_y = mouse_y + R.scroll_y
+            AMouse_x = mouse_x + s.scroll_x
+            AMouse_y = mouse_y + s.scroll_y
 
             # Check if the mouse is near any edge and scroll accordingly
-            if mouse_x < R.edge_threshold:  # Mouse is near the left edge
-                R.scroll_x -= R.scroll_speed
-            if mouse_x > R.screen_width - R.edge_threshold:  # Mouse is near the right edge
-                R.scroll_x += R.scroll_speed
-            if mouse_y < R.edge_threshold:  # Mouse is near the top edge
-                R.scroll_y -= R.scroll_speed
-            if mouse_y > R.screen_height - R.edge_threshold:  # Mouse is near the bottom edge
-                R.scroll_y += R.scroll_speed
+            if mouse_x < edge_threshold:  # Mouse is near the left edge
+                s.scroll_x -= scroll_speed
+            if mouse_x > s.screen.get_width() - edge_threshold:  # Mouse is near the right edge
+                s.scroll_x += scroll_speed
+            if mouse_y < edge_threshold:  # Mouse is near the top edge
+                s.scroll_y -= scroll_speed
+            if mouse_y > s.screen.get_height() - edge_threshold:  # Mouse is near the bottom edge
+                s.scroll_y += scroll_speed
 
             # Ensure scrolling doesn't go beyond the map boundaries
-            R.scroll_x = max(0, R.scroll_x)                        # left edge
-            R.scroll_x = min(R.MAPW - R.screen_width, R.scroll_x)  # right edge
-            R.scroll_y = max(0, R.scroll_y)                        # top edge
-            R.scroll_y = min(R.MAPH - R.screen_height, R.scroll_y) # bottom edge
+            s.scroll_x = max(0, s.scroll_x)                        # left edge
+            s.scroll_x = min(R.MAPW - s.screen.get_width(), s.scroll_x)  # right edge
+            s.scroll_y = max(0, s.scroll_y)                        # top edge
+            s.scroll_y = min(R.MAPH - s.screen.get_height(), s.scroll_y) # bottom edge
 
             # input handle
             for ev in event.get():
