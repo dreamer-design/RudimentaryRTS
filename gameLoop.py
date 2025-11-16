@@ -80,6 +80,7 @@ class GameLoop:
                     if keys[K_c]:
                         s.manager.addNode( AMouse_x, AMouse_y)
 
+                # unit handling
                 if ev.type == MOUSEBUTTONDOWN:
                     if ev.button == 1:  # Left click -> select
                         # s.selected = s.manager.get_entity_at( pos ) # return null/pos
@@ -101,6 +102,18 @@ class GameLoop:
                                 # Right-click elsewhere -> set spawn point
                                 s.selected.set_spawn(AMouse_x, AMouse_y)
 
+                # build mode
+                if s.build_mode:
+                    s.display.draw_silohette( mouse.get_pos() ) # reaches
+                    if ev.type == MOUSEBUTTONDOWN:
+                        if ev.button == 1:  # Left click -> select
+                            s.manager.addStructure( AMouse_x, AMouse_y, team=s.build_team )
+                            s.cancel_build_mode()
+
+                        elif ev.button == 3:  # Right click
+                            s.cancel_build_mode()
+
+                ### UI
                 # scroll for build cycling
                 if ev.type == MOUSEWHEEL:
                     # print(ev.y)
@@ -109,14 +122,12 @@ class GameLoop:
                     elif ev.y == -2:  # scroll down
                         s.cycle_build_type(-1)
 
-                ### UI
-                # Button click integration
+                # Button click
                 result = s.display.build_button.handle_event(ev)
                 if result == 'left':
                     s.enter_build_mode(team=0)
                 elif result == 'right':
                     s.enter_build_mode(team=1)
-
 
     def cycle_build_type(self, direction):
         self.build_index = (self.build_index + direction) % len(self.build_types)
@@ -126,56 +137,8 @@ class GameLoop:
     def enter_build_mode(self, team):
         self.build_team = team
         self.build_mode = self.build_types[self.build_index]   # current type
-        print("build mode: " + self.build_mode)
+        print("build mode: " + self.build_mode + " team: " + str(team) )
 
     def cancel_build_mode(self):
         self.build_mode = None
         self.build_team = None
-
-    def attempt_place_structure(self, x, y, team):
-        print("place")
-        if not self.can_place(x, y, self.build_mode, team):
-            return  # red silhouette means invalid
-
-        if self.build_mode == "pylon":
-            self.manager.addPylon(x, y, team)
-
-        elif self.build_mode == "factory":
-            self.manager.addFactory(x, y, team)
-
-        # reset mode
-        self.cancel_build_mode()
-
-    def can_place(self, x, y, build_mode, team):
-        # Example overlap check (no structure collision)
-        for e in self.manager.entities:
-            if hasattr(e, "size"):
-                if abs(e.x - x) < e.size and abs(e.y - y) < e.size:
-                    return False
-        return True
-
-    def render_build_silhouette(self):
-        if not self.build_mode:
-            return
-
-        mx, my = pygame.mouse.get_pos()
-        build_type = self.build_mode
-
-        # size based on entity type
-        if build_type == "pylon":
-            size = 50
-        elif build_type == "factory":
-            size = 80
-
-        color_valid = (0,255,0)
-        color_invalid = (255,0,0)
-
-        valid = self.can_place(mx, my, build_type, self.build_team)
-        color = color_valid if valid else color_invalid
-
-        pygame.draw.rect(
-            screen,
-            color,
-            pygame.Rect(mx - size/2, my - size/2, size, size),
-            width=2
-        )

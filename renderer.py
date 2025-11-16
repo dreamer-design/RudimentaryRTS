@@ -1,3 +1,4 @@
+import pygame
 from pygame import display, Surface
 from pygame import draw
 from pygame import Rect
@@ -13,6 +14,7 @@ class Renderer:
         def __init__(s, screen, manager, entities):
             s.screen = screen
             s.map_buffer = Surface( (C.MAPW, C.MAPH) )
+            s.ui_buffer = Surface(s.screen.get_size(), pygame.SRCALPHA)
             s.toDraw = entities
             s.manager = manager
             s.font = font.Font(None, 74)  # None means default font, 74 is the size
@@ -68,8 +70,8 @@ class Renderer:
                     draw.circle(s.map_buffer, (0, 255, 0), (int(entity.x), int(entity.y)), 5)
 
                 # Draw the portion of the buffer that we want to show on the screen
-            # s.screen.blit(map_buffer, (0, 0), (scroll_x, scroll_y, screen_width, screen_height))
             s.screen.blit(s.map_buffer, (0, 0), (scroll[0], scroll[1], s.screen.get_width(), s.screen.get_height() ))
+            s.screen.blit(s.ui_buffer, (0, 0))
 
             # UI
             s.draw_minimap(s.screen, s.toDraw)
@@ -131,3 +133,16 @@ class Renderer:
                     draw.circle(map_buffer, color, (int(px), int(py)), 2)
                 elif isinstance(e, Structure):
                     draw.rect(map_buffer, color, Rect(px - 2, py - 2, 4, 4))
+
+        def draw_silohette(s, mouse):
+            mx, my = mouse[0], mouse[1]
+            size = 50
+            # print(mx, my)
+            s.ui_buffer.fill((0,0,0,0))   # transparent
+
+            draw.rect(
+                s.ui_buffer,
+                (0,255,0),
+                Rect(mx, my, size, size),
+                width=2
+            )
