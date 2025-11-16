@@ -138,7 +138,7 @@ class Renderer:
             mx, my = mouse[0], mouse[1]
             size = 50
             # print(mx, my)
-            s.ui_buffer.fill((0,0,0,0))   # transparent
+            s.clear_UI()   # transparent
 
             draw.rect(
                 s.ui_buffer,
@@ -146,3 +146,7 @@ class Renderer:
                 Rect(mx, my, size, size),
                 width=2
             )
+
+        def clear_UI(s):
+            s.ui_buffer.fill((0,0,0,0))   # transparent
+

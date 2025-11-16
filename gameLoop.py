@@ -109,6 +109,7 @@ class GameLoop:
                         if ev.button == 1:  # Left click -> select
                             s.manager.addStructure( AMouse_x, AMouse_y, team=s.build_team )
                             s.cancel_build_mode()
+                            s.display.clear_UI()
 
                         elif ev.button == 3:  # Right click
                             s.cancel_build_mode()
@@ -132,12 +133,12 @@ class GameLoop:
     def cycle_build_type(self, direction):
         self.build_index = (self.build_index + direction) % len(self.build_types)
         self.build_mode = self.build_types[self.build_index]
-        print( "cycle: ", self.build_mode )
+        # print( "cycle: ", self.build_mode )
 
     def enter_build_mode(self, team):
         self.build_team = team
         self.build_mode = self.build_types[self.build_index]   # current type
-        print("build mode: " + self.build_mode + " team: " + str(team) )
+        # print("build mode: " + self.build_mode + " team: " + str(team) )
 
     def cancel_build_mode(self):
         self.build_mode = None

@@ -1,5 +1,5 @@
 import math
-# import renderer as R
+import constants as C
 
 SPAWN_TIME = 30
 MAX_HP = 5
@@ -20,8 +20,8 @@ class EntityManager:
     def removeEntity(s, e):
         s.entities.remove(e)
 
-    def addStructure(s, x, y, spawn_point= (100,100), team=0 ):
-        s.entities.append( Structure(x,y, spawn_point, team) )
+    def addStructure(s, x, y, team=0 ):
+        s.entities.append( Structure(x,y, team) )
 
     def addNode(s, x, y ):
         s.entities.append( Node(x,y) )
@@ -169,9 +169,9 @@ class Structure(Entity):
         spawn = []
         spawn_timer = 0
 
-        def __init__(s, x, y, spawn_point=(100,100), team=0 ):
+        def __init__(s, x, y, team ):
             super().__init__(x, y, rotation=0, size=80, team=team)
-            s.spawn = spawn_point
+            s.spawn = (C.MAPW/2, C.MAPH/2) # if no spawn point set send to middle of map
             s.spawn_timer = 0
             s.spawnable = True
 
@@ -188,7 +188,7 @@ class Structure(Entity):
         def spawn_unit(s, manager):
             if s.spawnable and s.spawn:
                 sx, sy = s.x, s.y # Spawn unit at the structure’s center
-                unit = manager.addUnit(sx, sy, s.spawn) # set its target to the spawn point
+                unit = manager.addUnit(sx, sy, s.spawn, team=s.team) # set its target to the spawn point
 
                 # Handle cooldown
                 s.spawnable = False
@@ -217,7 +217,7 @@ class Projectile(Entity):
         # Check if the projectile hits any entity in the list
         hit_entity = super().collision(entities)  # Use the parent class's collision method
         if hit_entity:
-            print(f"Projectile hit entity at position ({hit_entity.x}, {hit_entity.y})")
+            # print(f"Projectile hit entity at position ({hit_entity.x}, {hit_entity.y})")
             return hit_entity
         return None
 
